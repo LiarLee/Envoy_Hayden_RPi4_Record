@@ -1,0 +1,78 @@
+---
+version: "3.3"
+services:
+  envoy-ingress:
+    image: envoyproxy/envoy:v1.22-latest
+    ports:
+    - 80:80
+    - 9901:9901
+    volumes:
+      - ./envoy-ingress.yaml:/etc/envoy/envoy.yaml
+      - ./dynamic_config:/var/lib/envoy
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - "ENVOY_UID=0"
+      - TZ=Asia/Shanghai
+    command: envoy -c /etc/envoy/envoy.yaml --base-id 1
+    depends_on:
+      - heimdall
+      - grafana
+      - portainer
+    networks:
+      haydenmesh: {}
+    # restart: always
+    # network_mode: "host"
+
+  heimdall:
+    image: linuxserver/heimdall:latest
+    deploy:
+      replicas: 2
+    restart: always
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Shanghai
+    volumes:
+      - /opt/ingressgateway-envoy/heimdall/config:/config
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      haydenmesh: {}
+
+  grafana:
+    image: grafana/grafana-oss:main-ubuntu
+    deploy: 
+      replicas: 2
+    restart: always
+    environment:
+      - TZ=Asia/Shanghai
+    volumes:
+      - /opt/ingressgateway-envoy/grafana/grafana_data:/var/lib/grafana
+      - /opt/ingressgateway-envoy/grafana/grafana.ini:/etc/grafana/grafana.ini
+      - /etc/localtime:/etc/localtime:ro
+    user: '472'
+    networks:
+      haydenmesh: {}
+
+  portainer:
+    image: portainer/portainer-ce:latest
+    environment:
+      - UUID=0
+      - GUID=0
+      - TZ=Asia/Shanghai
+       #  dns:
+       #    - 192.168.31.199
+    volumes:
+      - /run/docker.sock:/var/run/docker.sock
+      - /opt/ingressgateway-envoy/portainer/portainer_data:/data
+      - /etc/localtime:/etc/localtime:ro
+    restart: always
+    networks:
+      haydenmesh: {}
+    cap_add:
+      - ALL
+    depends_on:
+      - portainer-agent
+
+networks:
+  haydenmesh: 
+    driver: bridge

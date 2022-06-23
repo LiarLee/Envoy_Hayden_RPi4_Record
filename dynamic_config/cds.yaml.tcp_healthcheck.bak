@@ -1,0 +1,66 @@
+resources:
+- "@type": type.googleapis.com/envoy.config.cluster.v3.Cluster
+  name: heimdall
+  connect_timeout: 0.25s
+  type: STRICT_DNS
+  lb_policy: ROUND_ROBIN
+  dns_lookup_family: V4_ONLY
+  load_assignment:
+    cluster_name: heimdall
+    endpoints:
+    - lb_endpoints:
+      - endpoint:
+          address:
+            socket_address:
+              address: heimdall
+              port_value: 80
+  health_checks:
+  - timeout: 1s
+    interval: 2s
+    unhealthy_threshold: 2
+    healthy_threshold: 2
+    tcp_health_check: {}
+    
+- "@type": type.googleapis.com/envoy.config.cluster.v3.Cluster
+  name: grafana
+  connect_timeout: 0.25s
+  type: STRICT_DNS
+  lb_policy: ROUND_ROBIN
+  dns_lookup_family: V4_ONLY
+  load_assignment:
+    cluster_name: grafana
+    endpoints:
+    - lb_endpoints:
+      - endpoint:
+          address:
+            socket_address:
+              address: grafana
+              port_value: 3000
+  health_checks:
+  - timeout: 1s
+    interval: 2s
+    unhealthy_threshold: 2
+    healthy_threshold: 2
+    tcp_health_check: {}
+
+- "@type": type.googleapis.com/envoy.config.cluster.v3.Cluster
+  name: portainer
+  connect_timeout: 0.25s
+  type: STRICT_DNS
+  lb_policy: ROUND_ROBIN
+  dns_lookup_family: V4_ONLY
+  load_assignment:
+    cluster_name: portainer
+    endpoints:
+    - lb_endpoints:
+      - endpoint:
+          address:
+            socket_address:
+              address: portainer
+              port_value: 9000
+  health_checks:
+  - timeout: 1s
+    interval: 2s
+    unhealthy_threshold: 2
+    healthy_threshold: 2
+    tcp_health_check: {}

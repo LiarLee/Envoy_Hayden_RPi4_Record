@@ -1,0 +1,4 @@
+/grafana/grafana.ini
+/grafana/grafana_data/*
+/heimdall/config/*
+/portainer/portainer_data/*
