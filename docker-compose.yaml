@@ -65,21 +65,16 @@ services:
       - UUID=0
       - GUID=0
       - TZ=Asia/Shanghai
-       #  dns:
-       #    - 192.168.31.199
     volumes:
       - /run/docker.sock:/var/run/docker.sock
       - /opt/ingressgateway-envoy/portainer/portainer_data:/data
       - /etc/localtime:/etc/localtime:ro
-    restart: always
     networks:
       haydenmesh: {}
     dns: 
       - 192.168.31.199
     cap_add:
       - ALL
-    depends_on:
-      - portainer-agent
 
   ariang:
     image: nginx:latest
@@ -89,10 +84,41 @@ services:
       replicas: 2
     volumes:
       - "/opt/ingressgateway-envoy/ariang/index.html:/usr/share/nginx/html/index.html"
+      - "/opt/ingressgateway-envoy/ariang/font-awesome/fontawesome-webfont.woff2:/usr/share/nginx/html/fonts/fontawesome-webfont.woff2"
+      - /etc/localtime:/etc/localtime:ro
     dns:
       - 192.168.31.199
     networks:
       haydenmesh: {}
+
+  statsd_exporter:
+    image: prom/statsd-exporter:latest
+    restart: always
+    network_mode: "host"
+
+  jeager:
+    image: jaegertracing/all-in-one:latest
+    restart: always
+    environment:
+      - COLLECTOR_ZIPKIN_HOST_PORT=:9411
+      - COLLECTOR_OTLP_ENABLED=true
+    volumes:
+      - /run/docker.sock:/var/run/docker.sock
+      - /opt/ingressgateway-envoy/portainer/portainer_data:/data
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      haydenmesh: {}
+    ports:
+     - 6831:6831/udp
+     - 6832:6832/udp
+     - 5778:5778
+     - 16686:16686
+     - 4317:4317
+     - 4318:4318
+     - 14250:14250
+     - 14268:14268
+     - 14269:14269
+     - 9411:9411
 
 networks:
   haydenmesh: 

@@ -1,4 +1,4 @@
-resources: 
+resources:
 - "@type": type.googleapis.com/envoy.config.cluster.v3.Cluster
   name: heimdall
   connect_timeout: 0.25s
@@ -37,7 +37,7 @@ resources:
             socket_address:
               address: grafana
               port_value: 3000
-  # For new service's loose rule, detect 503 and only 10% can be ejected.
+  # For new service's loose rule, and detect 503 and only 10% can be ejected.
   outlier_detection:
     consecutive_gateway_failure: "3"
     base_ejection_time: "30s"
@@ -94,19 +94,3 @@ resources:
             socket_address:
               address: 192.168.31.199
               port_value: 9125
-
-- "@type": type.googleapis.com/envoy.config.cluster.v3.Cluster
-  name: jaeger
-  connect_timeout: 0.25s
-  type: STRICT_DNS
-  lb_policy: ROUND_ROBIN
-  dns_lookup_family: V4_ONLY
-  load_assignment:
-    cluster_name: jaeger
-    endpoints:
-    - lb_endpoints:
-      - endpoint:
-          address:
-            socket_address:
-              address: 192.168.31.199
-              port_value: 9411

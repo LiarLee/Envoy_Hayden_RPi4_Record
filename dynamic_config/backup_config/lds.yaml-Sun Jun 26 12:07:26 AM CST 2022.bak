@@ -9,22 +9,13 @@ resources:
     - name: envoy.filters.network.http_connection_manager
       typed_config:
         "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
-        generate_request_id: true
-        tracing:
-          provider:
-            name: envoy.tracers.zipkin
-            typed_config:
-              "@type": type.googleapis.com/envoy.config.trace.v3.ZipkinConfig
-              collector_cluster: jaeger
-              collector_endpoint: "/api/v2/spans"
-              shared_span_context: false
-              collector_endpoint_version: HTTP_JSON
         stat_prefix: ingress_http
         access_log:
         - name: envoy.access_loggers.stdout
           typed_config:
             "@type": type.googleapis.com/envoy.extensions.access_loggers.stream.v3.StdoutAccessLog
         codec_type: AUTO
+        generate_request_id: true
         route_config:
           name: ingressgateway_route
           virtual_hosts:
@@ -52,5 +43,3 @@ resources:
         - name: envoy.filters.http.router
           typed_config:
             "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
-        use_remote_address: true
-

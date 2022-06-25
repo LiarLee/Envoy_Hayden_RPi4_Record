@@ -1,5 +1,4 @@
-resources: 
-- "@type": type.googleapis.com/envoy.config.cluster.v3.Cluster
+resources: - "@type": type.googleapis.com/envoy.config.cluster.v3.Cluster
   name: heimdall
   connect_timeout: 0.25s
   type: STRICT_DNS
