@@ -33,3 +33,6 @@ drwxr-xr-x 1 hayden hayden   12 Jun 23 14:34 heimdall
 drwxr-xr-x 1 root   root     28 Jun 23 14:30 portainer
 -rw-r--r-- 1 root   root    569 Jun 23 14:48 README.md
 ```
+
+1. Next time maybe add the other envoy to mesh. 
+2. this project just add an envoy ingressgateway to distribute traffic, and add marker for jeager.
