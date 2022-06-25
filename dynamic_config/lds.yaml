@@ -1,6 +1,7 @@
 resources:
 - "@type": type.googleapis.com/envoy.config.listener.v3.Listener
   name: listener_0
+  per_connection_buffer_limit_bytes: 409600
   address:
     socket_address: { address: 0.0.0.0, port_value: 80 }
   filter_chains:
@@ -32,6 +33,11 @@ resources:
             routes:
             - match: { prefix: "/" }
               route: { cluster: portainer }
+          - name: ariang_service
+            domains: ["ariang.liarlee.site"]
+            routes:
+            - match: { prefix: "/" }
+              route: { cluster: ariang }
         http_filters:
         - name: envoy.filters.http.router
           typed_config:

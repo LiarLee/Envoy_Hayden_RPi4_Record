@@ -62,3 +62,20 @@ resources:
   outlier_detection:
     consecutive_5xx: "3"
     base_ejection_time: "30s"
+
+- "@type": type.googleapis.com/envoy.config.cluster.v3.Cluster
+  name: ariang
+  connect_timeout: 0.25s
+  type: STRICT_DNS
+  lb_policy: ROUND_ROBIN
+  dns_lookup_family: V4_ONLY
+  load_assignment:
+    cluster_name: ariang
+    endpoints:
+    - lb_endpoints:
+      - endpoint:
+          address:
+            socket_address:
+              address: ariang
+              port_value: 80
+
