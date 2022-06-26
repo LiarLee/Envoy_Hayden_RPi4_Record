@@ -110,19 +110,3 @@ resources:
             socket_address:
               address: 192.168.31.199
               port_value: 9411
-
-- "@type": type.googleapis.com/envoy.config.cluster.v3.Cluster
-  name: jaeger-UI
-  connect_timeout: 0.25s
-  type: STRICT_DNS
-  lb_policy: ROUND_ROBIN
-  dns_lookup_family: V4_ONLY
-  load_assignment:
-    cluster_name: jaeger-UI
-    endpoints:
-    - lb_endpoints:
-      - endpoint:
-          address:
-            socket_address:
-              address: 192.168.31.199
-              port_value: 16686
