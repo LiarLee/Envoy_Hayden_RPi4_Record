@@ -1,0 +1,128 @@
+resources: 
+- "@type": type.googleapis.com/envoy.config.cluster.v3.Cluster
+  name: heimdall
+  connect_timeout: 0.25s
+  type: STRICT_DNS
+  lb_policy: ROUND_ROBIN
+  dns_lookup_family: V4_ONLY
+  load_assignment:
+    cluster_name: heimdall
+    endpoints:
+    - lb_endpoints:
+      - endpoint:
+          address:
+            socket_address:
+              address: heimdall
+              port_value: 80
+# for high traffic and stable service, evaluate the error rate and eject them.
+  outlier_detection:
+    interval: "10s"
+    base_ejection_time: "30s"
+    success_rate_minimum_hosts: "1" # 启用规则的最小主机数量.
+    success_rate_request_volume: "100" #  收集统计数据的最小值, 满足数量才会评估.
+    success_rate_stdev_factor: "1000" # 确定成功率异常的弹出因子.
+
+- "@type": type.googleapis.com/envoy.config.cluster.v3.Cluster
+  name: grafana
+  connect_timeout: 0.25s
+  type: STRICT_DNS
+  lb_policy: ROUND_ROBIN
+  dns_lookup_family: V4_ONLY
+  load_assignment:
+    cluster_name: grafana
+    endpoints:
+    - lb_endpoints:
+      - endpoint:
+          address:
+            socket_address:
+              address: grafana
+              port_value: 3000
+  # For new service's loose rule, detect 503 and only 10% can be ejected.
+  outlier_detection:
+    consecutive_gateway_failure: "3"
+    base_ejection_time: "30s"
+    enforcing_consecutive_gateway_failure: "10"
+  
+- "@type": type.googleapis.com/envoy.config.cluster.v3.Cluster
+  name: portainer
+  connect_timeout: 0.25s
+  type: STRICT_DNS
+  lb_policy: ROUND_ROBIN
+  dns_lookup_family: V4_ONLY
+  load_assignment:
+    cluster_name: portainer
+    endpoints:
+    - lb_endpoints:
+      - endpoint:
+          address:
+            socket_address:
+              address: portainer
+              port_value: 9000
+  # Sample rules, just eject the 5xx error 3 times.
+  outlier_detection:
+    consecutive_5xx: "3"
+    base_ejection_time: "30s"
+
+- "@type": type.googleapis.com/envoy.config.cluster.v3.Cluster
+  name: ariang
+  connect_timeout: 0.25s
+  type: STRICT_DNS
+  lb_policy: ROUND_ROBIN
+  dns_lookup_family: V4_ONLY
+  load_assignment:
+    cluster_name: ariang
+    endpoints:
+    - lb_endpoints:
+      - endpoint:
+          address:
+            socket_address:
+              address: ariang
+              port_value: 80
+
+- "@type": type.googleapis.com/envoy.config.cluster.v3.Cluster
+  name: statsd_exporter
+  connect_timeout: 0.25s
+  type: STRICT_DNS
+  lb_policy: ROUND_ROBIN
+  dns_lookup_family: V4_ONLY
+  load_assignment:
+    cluster_name: statsd_exporter
+    endpoints:
+    - lb_endpoints:
+      - endpoint:
+          address:
+            socket_address:
+              address: 192.168.31.199
+              port_value: 9125
+
+- "@type": type.googleapis.com/envoy.config.cluster.v3.Cluster
+  name: jaeger
+  connect_timeout: 0.25s
+  type: STRICT_DNS
+  lb_policy: ROUND_ROBIN
+  dns_lookup_family: V4_ONLY
+  load_assignment:
+    cluster_name: jaeger
+    endpoints:
+    - lb_endpoints:
+      - endpoint:
+          address:
+            socket_address:
+              address: 192.168.31.199
+              port_value: 9411
+
+- "@type": type.googleapis.com/envoy.config.cluster.v3.Cluster
+  name: jaeger-UI
+  connect_timeout: 0.25s
+  type: STRICT_DNS
+  lb_policy: ROUND_ROBIN
+  dns_lookup_family: V4_ONLY
+  load_assignment:
+    cluster_name: jaeger-UI
+    endpoints:
+    - lb_endpoints:
+      - endpoint:
+          address:
+            socket_address:
+              address: 192.168.31.199
+              port_value: 16686
