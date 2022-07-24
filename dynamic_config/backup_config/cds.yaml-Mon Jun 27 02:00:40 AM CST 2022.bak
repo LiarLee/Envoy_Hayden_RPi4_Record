@@ -12,8 +12,8 @@ resources:
       - endpoint:
           address:
             socket_address:
-              address: heimdall-sidecar
-              port_value: 81
+              address: heimdall
+              port_value: 80
 # for high traffic and stable service, evaluate the error rate and eject them.
   outlier_detection:
     interval: "10s"
@@ -76,7 +76,7 @@ resources:
       - endpoint:
           address:
             socket_address:
-              address: ariang-sidecar
+              address: ariang
               port_value: 80
 
 - "@type": type.googleapis.com/envoy.config.cluster.v3.Cluster
@@ -141,4 +141,4 @@ resources:
           address:
             socket_address:
               address: 192.168.128.254
-              port_value: 9090
+              port_value: 80

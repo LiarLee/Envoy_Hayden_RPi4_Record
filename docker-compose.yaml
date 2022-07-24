@@ -1,6 +1,8 @@
 ---
 version: "3.8"
 services:
+# Ingress Gateway Container
+# 
   envoy-ingress:
     image: envoyproxy/envoy:v1.22-latest
     restart: always
@@ -9,26 +11,23 @@ services:
     - 9901:9901
     volumes:
       - ./envoy-ingress.yaml:/etc/envoy/envoy.yaml
-      - ./dynamic_config:/var/lib/envoy
-      - /etc/localtime:/etc/localtime:ro
+      - "./dynamic_config:/var/lib/envoy"
     environment:
-      - "ENVOY_UID=0"
-      - TZ=Asia/Shanghai
+      - ENVOY_UID=0
     command: envoy -c /etc/envoy/envoy.yaml --base-id 1
-    depends_on:
-      - heimdall
-      - grafana
-      - portainer
+    depends_on: 
+    - heimdall-service
+    - portainer
+    - ariang
+    - jeager
     networks:
       haydenmesh: {}
-    dns: 
-      - 192.168.31.199
 
-  heimdall:
+# Heimdall and Sidecar
+# 
+  heimdall-service:
     image: linuxserver/heimdall:latest
     restart: always
-    deploy:
-      replicas: 2
     environment:
       - PUID=1000
       - PGID=1000
@@ -36,27 +35,18 @@ services:
     volumes:
       - /opt/ingressgateway-envoy/heimdall/config:/config
       - /etc/localtime:/etc/localtime:ro
-    networks:
-      haydenmesh: {}
-    dns: 
-      - 192.168.31.199
-
-  grafana:
-    image: grafana/grafana-oss:main-ubuntu
+    network_mode: "service:heimdall-sidecar"
+    depends_on:
+      - heimdall-sidecar
+  heimdall-sidecar:
+    image: envoyproxy/envoy:v1.22-latest
     restart: always
-    deploy: 
-      replicas: 2
-    environment:
-      - TZ=Asia/Shanghai
     volumes:
-      - /opt/ingressgateway-envoy/grafana/grafana_data:/var/lib/grafana
-      - /opt/ingressgateway-envoy/grafana/grafana.ini:/etc/grafana/grafana.ini
-      - /etc/localtime:/etc/localtime:ro
-    user: '472'
+      - ./heimdall/envoy-bootstrap.yaml:/etc/envoy/envoy.yaml
+    environment:
+      - ENVOY_UID=0
     networks:
       haydenmesh: {}
-    dns: 
-      - 192.168.31.199
 
   portainer:
     image: portainer/portainer-ce:latest
@@ -71,23 +61,27 @@ services:
       - /etc/localtime:/etc/localtime:ro
     networks:
       haydenmesh: {}
-    dns: 
-      - 192.168.31.199
     cap_add:
       - ALL
 
+# AriaNG and sidecar
   ariang:
     image: nginx:latest
     restart: always
-    deploy:
-      mode: replicated
-      replicas: 2
     volumes:
       - "/opt/ingressgateway-envoy/ariang/index.html:/usr/share/nginx/html/index.html"
       - "/opt/ingressgateway-envoy/ariang/font-awesome/fontawesome-webfont.woff2:/usr/share/nginx/html/fonts/fontawesome-webfont.woff2"
       - /etc/localtime:/etc/localtime:ro
-    dns:
-      - 192.168.31.199
+    network_mode: "service:ariang-sidecar"
+    depends_on:
+      - ariang-sidecar
+  ariang-sidecar:
+    image: envoyproxy/envoy:v1.22-latest
+    restart: always
+    volumes:
+      - ./ariang/envoy-bootstrap.yaml:/etc/envoy/envoy.yaml
+    environment:
+      - ENVOY_UID=0
     networks:
       haydenmesh: {}
 
@@ -119,6 +113,31 @@ services:
      - 14268:14268
      - 14269:14269
      - 9411:9411
+
+  grafana-sidecar:
+    image: envoyproxy/envoy:v1.22-latest
+    restart: always
+    volumes:
+      - ./grafana/envoy-bootstrap.yaml:/etc/envoy/envoy.yaml
+    environment:
+      - ENVOY_UID=0
+    networks:
+      haydenmesh:
+        ipv4_address: 192.168.128.253
+
+  grafana:
+    image: grafana/grafana-oss:main-ubuntu
+    restart: always
+    environment:
+      - TZ=Asia/Shanghai
+    volumes:
+      - /opt/ingressgateway-envoy/grafana/grafana_data:/var/lib/grafana
+      - /opt/ingressgateway-envoy/grafana/grafana.ini:/etc/grafana/grafana.ini
+      - /etc/localtime:/etc/localtime:ro
+    user: '472'
+    network_mode: "service:grafana-sidecar"
+    depends_on:
+      - grafana-sidecar
 
 networks:
   haydenmesh: 

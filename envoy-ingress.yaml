@@ -1,10 +1,20 @@
 node:
-  cluster: haydenrpi4
+  cluster: ingress-gateway
   id: haydenrpi4
 
 admin:
   address:
     socket_address: { address: 0.0.0.0, port_value: 9901 }
+
+stats_sinks:
+  - name: envoy.stat_sinks.statsd
+    typed_config: 
+      "@type": type.googleapis.com/envoy.config.metrics.v3.StatsdSink
+      address: 
+        socket_address: 
+          address: 192.168.31.199
+          port_value: 9125
+      prefix: envoy-ingress
 
 dynamic_resources:
   cds_config:
@@ -16,13 +26,4 @@ dynamic_resources:
     path_config_source: 
       path: /var/lib/envoy/lds.yaml
 
-stats_sinks:
-  - name: envoy.stat_sinks.statsd
-    typed_config: 
-      "@type": type.googleapis.com/envoy.config.metrics.v3.StatsdSink
-      address: 
-        socket_address: 
-          address: 192.168.31.199
-          port_value: 9125
-      prefix: envoy-ingress
 

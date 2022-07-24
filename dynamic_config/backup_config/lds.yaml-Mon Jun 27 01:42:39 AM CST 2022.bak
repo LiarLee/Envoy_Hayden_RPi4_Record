@@ -42,7 +42,7 @@ resources:
             routes:
             - match: { prefix: "/" }
               route: { cluster: heimdall }
-          - name: grafana_servic-sidecare
+          - name: grafana_service
             domains: ["grafana.liarlee.site"]
             routes:
             - match: { prefix: "/" }
